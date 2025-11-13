@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import TableItems from "./components/TableItems";
+import TableItems, { StockStatus } from "./components/TableItems";
 import { Button, Divider } from "antd";
 import InventoryPagination from "./components/InventoryPagination";
 import Search, { SearchType } from "./components/Search";
@@ -13,6 +13,7 @@ import {
 import axiosInstance from "../services/axiosInstance";
 import Swal from "sweetalert2";
 import { Warehouse } from "./types";
+import CreateInventoryModal from "./components/CreateInventoryModal";
 
 interface Item {
   sku: string;
@@ -21,7 +22,7 @@ interface Item {
   warehouse_id: number;
   qty: number;
   reserve_qty: number;
-  stock_status: "in_stock" | "low_stock" | "out_of_stock";
+  stock_status: StockStatus;
   updated_at: string;
   is_show: boolean;
   image: string;
@@ -136,6 +137,17 @@ const InventoryPage = () => {
     [fetchItems]
   );
 
+  const warehouseOptions = useMemo(() => {
+    return warehouses?.map((warehouse) => ({
+      value: warehouse.id,
+      label: warehouse.name,
+    }));
+  }, [warehouses]);
+
+  const handleCreateSuccess = () => {
+    fetchItems();
+  };
+
   useEffect(() => {
     fetchWarehouses();
     fetchItems();
@@ -148,9 +160,9 @@ const InventoryPage = () => {
           onSearch={handleSearch}
           filteredCount={filteredCount}
           totalCount={totalCount}
-          warehouses={warehouses}
+          warehouses={warehouseOptions}
         />
-        <Button disabled icon={<PlusCircleOutlined />} onClick={handleCreate}>
+        <Button icon={<PlusCircleOutlined />} onClick={handleCreate}>
           Create
         </Button>
         <Button disabled icon={<SyncOutlined />} onClick={handleRefresh} />
@@ -166,6 +178,13 @@ const InventoryPage = () => {
         pageSize={pageSize}
         onChange={handlePaginationChange}
         onPageSizeChange={handlePageSizeChange}
+      />
+
+      <CreateInventoryModal
+        open={isCreateModalOpen}
+        onCancel={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+        warehouses={warehouseOptions}
       />
     </div>
   );

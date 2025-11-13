@@ -2,19 +2,14 @@
 
 import { Input, Select, Space, Button, Tag } from "antd";
 import { SearchOutlined, RedoOutlined } from "@ant-design/icons";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { SelectProps } from "antd";
-
-interface Warehouse {
-  id: number;
-  name: string;
-}
 
 interface SearchProps {
   onSearch?: (searchType: SearchType, searchValue: string | string[]) => void;
   filteredCount?: number; // Number of filtered items displayed
   totalCount?: number; // Number of total filtered items
-  warehouses?: Warehouse[];
+  warehouses?: SelectProps["options"];
 }
 
 type TagRender = SelectProps["tagRender"];
@@ -45,13 +40,6 @@ const Search = ({
     { value: SearchType.ITEM_MASTER, label: "Item Master" },
     { value: SearchType.WAREHOUSE, label: "Warehouse" },
   ];
-
-  const warehouseOptions = useMemo(() => {
-    return warehouses?.map((warehouse) => ({
-      value: warehouse.id,
-      label: warehouse.name,
-    }));
-  }, [warehouses]);
 
   const tagRender: TagRender = (props) => {
     const { label, closable, onClose } = props;
@@ -146,7 +134,7 @@ const Search = ({
             placeholder="Select warehouses..."
             value={selectedWarehouses}
             onChange={setSelectedWarehouses}
-            options={warehouseOptions}
+            options={warehouses}
             loading={loading}
           />
         )}
