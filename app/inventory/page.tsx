@@ -153,6 +153,10 @@ const InventoryPage = () => {
     fetchItems();
   }, [fetchItems, fetchWarehouses]);
 
+  const handleAddedMovement = useCallback(() => {
+    fetchItems();
+  }, [fetchItems]);
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="w-full flex items-center gap-3 pt-2">
@@ -170,7 +174,11 @@ const InventoryPage = () => {
       </div>
       <Divider className="my-2" />
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <TableItems items={items} loading={loading} />
+        <TableItems
+          items={items}
+          loading={loading}
+          onAddedMovement={handleAddedMovement}
+        />
       </div>
       <InventoryPagination
         total={totalCount || 0}

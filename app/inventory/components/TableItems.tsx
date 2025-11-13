@@ -13,6 +13,7 @@ import { useState } from "react";
 import ItemMovementsTable from "./ItemMovementsTable";
 import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
+import AddMovementModal from "./AddMovementModal";
 
 export enum ActivityType {
   INBOUND = "inbound",
@@ -25,7 +26,7 @@ export enum StockStatus {
   OUT_OF_STOCK = "out_of_stock",
 }
 
-interface Item {
+export interface Item {
   sku: string;
   name: string;
   warehouse: string;
@@ -35,6 +36,7 @@ interface Item {
   updated_at: string;
   is_show: boolean;
   image: string;
+  warehouse_id: number;
 }
 
 export interface Movement {
@@ -55,9 +57,14 @@ interface MovementsData {
 interface TableItemsProps {
   items: Item[];
   loading?: boolean;
+  onAddedMovement?: () => void;
 }
 
-const TableItems = ({ items, loading = false }: TableItemsProps) => {
+const TableItems = ({
+  items,
+  loading = false,
+  onAddedMovement,
+}: TableItemsProps) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [movementsData, setMovementsData] = useState<
     Record<string, MovementsData>
@@ -68,8 +75,8 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
   const [addMovementModalOpen, setAddMovementModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  const fetchMovements = async (sku: string) => {
-    if (movementsData[sku]) return;
+  const fetchMovements = async (sku: string, forceRefresh: boolean = false) => {
+    if (movementsData[sku] && !forceRefresh) return;
 
     setLoadingMovements((prev) => ({ ...prev, [sku]: true }));
     try {
@@ -95,7 +102,7 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
   const handleExpand = (expanded: boolean, record: Item) => {
     if (expanded) {
       setExpandedRows((prev) => new Set(prev).add(record.sku));
-      fetchMovements(record.sku);
+      fetchMovements(record.sku, true);
     } else {
       setExpandedRows((prev) => {
         const newSet = new Set(prev);
@@ -110,6 +117,12 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
     setAddMovementModalOpen(true);
   };
 
+  const handleAddMovementSuccess = async (sku: string) => {
+    fetchMovements(sku, true);
+    if (onAddedMovement) {
+      onAddedMovement();
+    }
+  };
 
   const getStockStatusConfig = (status: string) => {
     const configs = {
@@ -308,6 +321,22 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
           }}
         />
       </div>
+
+      <AddMovementModal
+        open={addMovementModalOpen}
+        item={selectedItem}
+        onCancel={() => {
+          setAddMovementModalOpen(false);
+          setSelectedItem(null);
+        }}
+        onSuccess={() => {
+          if (selectedItem) {
+            handleAddMovementSuccess(selectedItem.sku);
+          }
+          setAddMovementModalOpen(false);
+          setSelectedItem(null);
+        }}
+      />
     </>
   );
 };

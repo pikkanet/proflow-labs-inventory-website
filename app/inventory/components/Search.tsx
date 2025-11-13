@@ -145,7 +145,6 @@ const Search = ({
           onClick={handleSearch}
           disabled={
             !searchType ||
-            (searchType === SearchType.ITEM_MASTER && !searchText) ||
             (searchType === SearchType.WAREHOUSE &&
               selectedWarehouses.length === 0)
           }
