@@ -14,6 +14,7 @@ import ItemMovementsTable from "./ItemMovementsTable";
 import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
 import AddMovementModal from "./AddMovementModal";
+import ItemMovementChart from "./ItemMovementChart";
 
 export enum ActivityType {
   INBOUND = "inbound",
@@ -287,7 +288,9 @@ const TableItems = ({
         <Divider className="-my-1" />
         <div className="flex flex-row gap-4">
           <div className="flex-1 min-w-0">
-            <p className="w-full h-full text-md font-bold">Chart</p>
+            <ItemMovementChart
+              movements={Array.isArray(movements) ? movements : []}
+            />
           </div>
           <div className="flex-1 min-w-0 overflow-visible">
             <ItemMovementsTable
