@@ -1,14 +1,29 @@
 "use client";
 
-import { Table, Image, Button, Space, Tooltip, Badge } from "antd";
+import { Table, Image, Button, Space, Tooltip, Badge, Divider } from "antd";
 import {
   EditOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
+  PlusCircleOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { format } from "date-fns";
 import { useState } from "react";
+import ItemMovementsTable from "./ItemMovementsTable";
+import axiosInstance from "@/app/services/axiosInstance";
+import Swal from "sweetalert2";
+
+export enum ActivityType {
+  INBOUND = "inbound",
+  OUTBOUND = "outbound",
+}
+
+export enum StockStatus {
+  IN_STOCK = "in_stock",
+  LOW_STOCK = "low_stock",
+  OUT_OF_STOCK = "out_of_stock",
+}
 
 interface Item {
   sku: string;
@@ -16,17 +31,18 @@ interface Item {
   warehouse: string;
   qty: number;
   reserve_qty: number;
-  stock_status: "in_stock" | "low_stock" | "out_of_stock";
+  stock_status: StockStatus;
   updated_at: string;
   is_show: boolean;
   image: string;
 }
 
-interface Movement {
-  activity: "inbound" | "outbound";
+export interface Movement {
+  id: string;
+  activity_type: ActivityType;
   qty: number;
   current_qty: number;
-  create_at: string;
+  created_at: string;
   note: string | null;
 }
 
@@ -43,17 +59,73 @@ interface TableItemsProps {
 
 const TableItems = ({ items, loading = false }: TableItemsProps) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [movementsData, setMovementsData] = useState<
+    Record<string, MovementsData>
+  >({});
+  const [loadingMovements, setLoadingMovements] = useState<
+    Record<string, boolean>
+  >({});
+  const [addMovementModalOpen, setAddMovementModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  const fetchMovements = async (sku: string) => {
+    if (movementsData[sku]) return;
+
+    setLoadingMovements((prev) => ({ ...prev, [sku]: true }));
+    try {
+      const response = await axiosInstance.get(`/item/${sku}/movements`);
+      const { data, status } = response;
+      if (status !== 200) {
+        throw new Error(data.message);
+      }
+      const movements = data.data;
+      setMovementsData((prev) => ({ ...prev, [sku]: movements }));
+    } catch {
+      await Swal.fire({
+        icon: "error",
+        title: "Something went wrong!",
+        text: "Please try again later",
+        confirmButtonColor: "#326A8C",
+      });
+    } finally {
+      setLoadingMovements((prev) => ({ ...prev, [sku]: false }));
+    }
+  };
 
   const handleExpand = (expanded: boolean, record: Item) => {
-    console.log("expanded", expanded, record);
+    if (expanded) {
+      setExpandedRows((prev) => new Set(prev).add(record.sku));
+      fetchMovements(record.sku);
+    } else {
+      setExpandedRows((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(record.sku);
+        return newSet;
+      });
+    }
+  };
+
+  const handleAddMovement = (record: Item) => {
+    setSelectedItem(record);
+    setAddMovementModalOpen(true);
+  };
+
 
   const getStockStatusConfig = (status: string) => {
     const configs = {
-      in_stock: { status: "success" as const, label: "In Stock" },
-      low_stock: { status: "warning" as const, label: "Low Stock" },
-      out_of_stock: { status: "error" as const, label: "Out of Stock" },
+      [StockStatus.IN_STOCK]: { status: "success" as const, label: "In Stock" },
+      [StockStatus.LOW_STOCK]: {
+        status: "warning" as const,
+        label: "Low Stock",
+      },
+      [StockStatus.OUT_OF_STOCK]: {
+        status: "error" as const,
+        label: "Out of Stock",
+      },
     };
-    return configs[status as keyof typeof configs] || configs.in_stock;
+    return (
+      configs[status as keyof typeof configs] || configs[StockStatus.IN_STOCK]
+    );
   };
 
   const renderColumns: ColumnsType<Item> = [
@@ -119,9 +191,9 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
       key: "stock_status",
       width: 160,
       filters: [
-        { text: "In Stock", value: "in_stock" },
-        { text: "Low Stock", value: "low_stock" },
-        { text: "Out of Stock", value: "out_of_stock" },
+        { text: "In Stock", value: StockStatus.IN_STOCK },
+        { text: "Low Stock", value: StockStatus.LOW_STOCK },
+        { text: "Out of Stock", value: StockStatus.OUT_OF_STOCK },
       ],
       onFilter: (value, record: Item) => record.stock_status === value,
       render: (status: string) => {
@@ -177,9 +249,43 @@ const TableItems = ({ items, loading = false }: TableItemsProps) => {
       ),
     },
   ];
+
   const expandedRowRender = (record: Item) => {
-    return null;
+    const movements = movementsData[record.sku] || [];
+    const isLoading = loadingMovements[record.sku];
+
+    if (isLoading) {
+      return <div className="p-4 text-center">Loading movements...</div>;
+    }
+
+    return (
+      <div className="p-2 pl-4 flex flex-col gap-4 overflow-visible bg-white">
+        <div className="flex justify-center">
+          <div className="flex flex-row gap-4 items-center justify-between w-full">
+            <p className="text-md font-bold">Inventory Movement</p>
+            <Button
+              icon={<PlusCircleOutlined />}
+              onClick={() => handleAddMovement(record)}
+            >
+              Add Movement
+            </Button>
+          </div>
+        </div>
+        <Divider className="-my-1" />
+        <div className="flex flex-row gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="w-full h-full text-md font-bold">Chart</p>
+          </div>
+          <div className="flex-1 min-w-0 overflow-visible">
+            <ItemMovementsTable
+              movements={Array.isArray(movements) ? movements : []}
+            />
+          </div>
+        </div>
+      </div>
+    );
   };
+
   return (
     <>
       <div className="h-full flex flex-col overflow-hidden">
