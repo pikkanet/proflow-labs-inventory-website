@@ -12,9 +12,10 @@ import {
 } from "antd";
 import Swal from "sweetalert2";
 import ItemMasterDisplay from "./ItemMasterDisplay";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "@/app/services/axiosInstance";
 import { ActivityType, Item } from "./TableItems";
+import { AxiosError } from "axios";
 
 interface AddMovementModalProps {
   open: boolean;
@@ -87,15 +88,21 @@ const AddMovementModal = ({
         }
       }
     } catch (error) {
-      if (error && typeof error === "object" && "errorFields" in error) {
-        return;
+      if (error instanceof AxiosError) {
+        await Swal.fire({
+          icon: "error",
+          title: "Add Movement Failed!",
+          text: error.response?.data?.message,
+          confirmButtonColor: "#326A8C",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Something went wrong!",
+          text: "Please try again later",
+          confirmButtonColor: "#326A8C",
+        });
       }
-      await Swal.fire({
-        icon: "error",
-        title: "Something went wrong!",
-        text: "Please try again later",
-        confirmButtonColor: "#326A8C",
-      });
     } finally {
       setSubmitting(false);
     }
@@ -115,6 +122,17 @@ const AddMovementModal = ({
   // Calculate character count for trimmed value
   const noteCount = noteValue.trim().length;
 
+  const values = Form.useWatch([], form);
+
+  const [submittable, setSubmittable] = useState<boolean>(false);
+
+  useEffect(() => {
+    form
+      .validateFields({ validateOnly: true })
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false));
+  }, [form, item, submittable, values]);
+
   return (
     <Modal
       title="Add Inventory Movement"
@@ -131,6 +149,7 @@ const AddMovementModal = ({
             type="primary"
             onClick={handleSubmit}
             loading={submitting}
+            disabled={!submittable}
           >
             Confirm
           </Button>
@@ -161,11 +180,17 @@ const AddMovementModal = ({
           <Form.Item
             label="Activity"
             name="activity"
-            initialValue={ActivityType.INBOUND}
             rules={[{ required: true, message: "Please select activity" }]}
             className="flex-1"
+            dependencies={["qty"]}
           >
-            <Select placeholder="Select activity" options={activityOptions} />
+            <Select
+              placeholder="Select activity"
+              options={activityOptions}
+              onChange={() => {
+                form.validateFields(["qty"]);
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -189,6 +214,16 @@ const AddMovementModal = ({
                     return Promise.reject(
                       new Error("Quantity must be greater than 0")
                     );
+                  }
+                  const activity = form.getFieldValue("activity");
+                  if (activity === ActivityType.OUTBOUND) {
+                    if (value > (item?.qty || 0)) {
+                      return Promise.reject(
+                        new Error(
+                          `Quantity must be less than or equal to ${item?.qty}`
+                        )
+                      );
+                    }
                   }
                   return Promise.resolve();
                 },

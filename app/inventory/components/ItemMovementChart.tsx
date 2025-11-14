@@ -45,16 +45,8 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "8px 12px",
-          border: "1px solid #e0e0e0",
-          borderRadius: "4px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <p style={{ margin: 0, fontWeight: 600 }}>
+      <div className="bg-white p-2 border border-gray-200 rounded-md shadow-md">
+        <p className="m-0 font-semibold">
           QTY: {payload[0].value} ({payload[0].payload.fullDate})
         </p>
       </div>
@@ -101,7 +93,7 @@ const ItemMovementChart = ({ movements }: ItemMovementChartProps) => {
   };
 
   return (
-    <div style={{ width: "100%", height: "300px", padding: "16px" }}>
+    <div className="w-full h-75">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={chartData}
@@ -110,7 +102,7 @@ const ItemMovementChart = ({ movements }: ItemMovementChartProps) => {
           onMouseLeave={() => setActiveIndex(null)}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="index" tick={{ fontSize: 12 }} stroke="#666" />
+          <XAxis dataKey="index" tick={false} stroke="#666" />
           <YAxis domain={yAxisDomain} tick={{ fontSize: 12 }} stroke="#666" />
           <Tooltip content={<CustomTooltip />} />
           <Bar dataKey="qty" radius={[4, 4, 0, 0]} barSize={20}>

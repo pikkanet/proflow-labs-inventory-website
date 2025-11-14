@@ -186,7 +186,7 @@ const AppLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
 
           {/* Bottom User Info */}
           <div className="px-4 py-4 text-gray-700">
-            <div className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center gap-2">
               <Avatar size={32} onClick={() => setCollapsed(false)}>
                 <span className="text-sm ">{getAvatar(email)}</span>
               </Avatar>

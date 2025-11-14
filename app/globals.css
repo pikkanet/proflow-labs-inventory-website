@@ -20,6 +20,46 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.ant-menu-item-selected {
+  background-color: #5b8db8 !important;
+  color: white;
+}
+
+.custom-menu .ant-menu-item-selected:hover {
+  background-color: #6ea1c3 !important;
+  filter: brightness(1.4);
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-inline,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline,
+.ant-menu-light.ant-menu-root.ant-menu-vertical,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none !important;
+}
+
+.ant-select-item-option-selected {
+  background-color: #5b8db8 !important;
+  color: white !important;
+}
+
+.ant-select-item-option-selected:hover {
+  background-color: #6ea1c3 !important;
+  filter: brightness(1.4);
+}
+
+.ant-select-item-option-active {
+  background-color: #6ea1c3 !important;
+  filter: brightness(1.4);
+}
+
+.ant-select-item-option:hover {
+  filter: brightness(1.4);
+}
+
+.ant-btn.ant-btn-primary {
+  box-shadow: none !important;
+}
+
 .ant-card .ant-card-body {
   padding: 12px !important;
 }

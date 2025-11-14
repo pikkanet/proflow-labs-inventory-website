@@ -14,6 +14,7 @@ import axiosInstance from "../services/axiosInstance";
 import Swal from "sweetalert2";
 import { Warehouse } from "./types";
 import CreateInventoryModal from "./components/CreateInventoryModal";
+import { useRefresh } from "../contexts/RefreshContext";
 
 interface Item {
   sku: string;
@@ -30,7 +31,8 @@ interface Item {
 
 const InventoryPage = () => {
   const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [loadingWarehouses, setLoadingWarehouses] = useState(true);
 
   const [filteredCount, setFilteredCount] = useState<number | undefined>(20);
   const [totalCount, setTotalCount] = useState<number | undefined>(21);
@@ -46,12 +48,10 @@ const InventoryPage = () => {
   );
   const [searchValue, setSearchValue] = useState<string | string[]>("");
 
+  const { refresh } = useRefresh();
+
   const handleCreate = () => {
     setIsCreateModalOpen(true);
-  };
-
-  const handleRefresh = () => {
-    console.log("Refresh triggered");
   };
 
   const handleExport = () => {
@@ -73,7 +73,7 @@ const InventoryPage = () => {
   const fetchItems = useCallback(
     async (page?: number, size?: number) => {
       try {
-        setLoading(true);
+        setLoadingItems(true);
 
         const params: Record<string, string | number> = {
           page: page ?? currentPage,
@@ -105,7 +105,7 @@ const InventoryPage = () => {
           confirmButtonColor: "#326A8C",
         });
       } finally {
-        setLoading(false);
+        setLoadingItems(false);
       }
     },
     [currentPage, pageSize, searchType, searchValue]
@@ -113,7 +113,7 @@ const InventoryPage = () => {
 
   const fetchWarehouses = useCallback(async () => {
     try {
-      setLoading(true);
+      setLoadingWarehouses(true);
       const response = await axiosInstance.get("/warehouses");
       const { data, status } = response;
       if (status !== 200) {
@@ -124,7 +124,7 @@ const InventoryPage = () => {
       setWarehouses(result);
     } catch {
     } finally {
-      setLoading(false);
+      setLoadingWarehouses(false);
     }
   }, []);
 
@@ -132,10 +132,16 @@ const InventoryPage = () => {
     (type: SearchType, value: string | string[]) => {
       setSearchType(type);
       setSearchValue(value);
-      fetchItems();
+      setCurrentPage(1);
     },
-    [fetchItems]
+    []
   );
+
+  const handleRefresh = useCallback(() => {
+    refresh();
+    fetchItems();
+    fetchWarehouses();
+  }, [refresh, fetchItems, fetchWarehouses]);
 
   const warehouseOptions = useMemo(() => {
     return warehouses?.map((warehouse) => ({
@@ -148,35 +154,39 @@ const InventoryPage = () => {
     fetchItems();
   };
 
-  useEffect(() => {
-    fetchWarehouses();
-    fetchItems();
-  }, [fetchItems, fetchWarehouses]);
-
   const handleAddedMovement = useCallback(() => {
     fetchItems();
   }, [fetchItems]);
 
+  useEffect(() => {
+    fetchWarehouses();
+  }, [fetchWarehouses]);
+
+  useEffect(() => {
+    fetchItems(currentPage, pageSize);
+  }, [searchType, searchValue, currentPage, fetchItems, pageSize]);
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="w-full flex items-center gap-3 pt-2">
+      <div className="w-full flex items-center gap-3">
         <Search
           onSearch={handleSearch}
           filteredCount={filteredCount}
           totalCount={totalCount}
           warehouses={warehouseOptions}
+          loading={loadingWarehouses}
         />
         <Button icon={<PlusCircleOutlined />} onClick={handleCreate}>
           Create
         </Button>
-        <Button disabled icon={<SyncOutlined />} onClick={handleRefresh} />
+        <Button icon={<SyncOutlined />} onClick={handleRefresh} />
         <Button disabled icon={<DownloadOutlined />} onClick={handleExport} />
       </div>
       <Divider className="my-2" />
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <TableItems
           items={items}
-          loading={loading}
+          loading={loadingItems}
           onAddedMovement={handleAddedMovement}
         />
       </div>

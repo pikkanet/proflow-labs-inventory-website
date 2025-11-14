@@ -57,7 +57,7 @@ const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
           }`}
         >
           {record.activity_type === ActivityType.INBOUND ? "+" : "-"}
-          {qty}
+          {qty.toLocaleString()}
         </span>
       ),
     },
@@ -70,7 +70,7 @@ const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
       rowKey={(record) => record.id}
       pagination={false}
       size="middle"
-      scroll={{ x: "max-content", y: 200 }}
+      scroll={{ x: "max-content", y: 250 }}
     />
   );
 };

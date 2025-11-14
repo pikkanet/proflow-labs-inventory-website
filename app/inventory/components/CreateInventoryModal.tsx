@@ -2,6 +2,7 @@
 
 import axiosInstance from "@/app/services/axiosInstance";
 import { Modal, Form, Input, Select, Divider, Button, SelectProps } from "antd";
+import { AxiosError } from "axios";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
@@ -33,7 +34,7 @@ const CreateInventoryModal = ({
       const randomColor = Math.floor(Math.random() * 1000)
         .toString()
         .padStart(3, "0");
-      const image = `https://dummyimage.com/600x400/${randomColor}/fff&text=${values.itemMaster[0]}`;
+      const image = `${process.env.NEXT_PUBLIC_MOCK_IMAGE_URL}/${randomColor}/fff&text=${values.itemMaster[0]}`;
 
       const response = await axiosInstance.post("/items", {
         name: values.itemMaster,
@@ -67,12 +68,21 @@ const CreateInventoryModal = ({
       if (error && typeof error === "object" && "errorFields" in error) {
         return;
       }
-      await Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: "An unexpected error occurred",
-        confirmButtonColor: "#326A8C",
-      });
+      if (error instanceof AxiosError) {
+        await Swal.fire({
+          icon: "error",
+          title: "Create Inventory Failed!",
+          text: error.response?.data?.message,
+          confirmButtonColor: "#326A8C",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Something went wrong!",
+          text: "Please try again later",
+          confirmButtonColor: "#326A8C",
+        });
+      }
     } finally {
       setSubmitting(false);
     }

@@ -10,6 +10,7 @@ interface SearchProps {
   filteredCount?: number; // Number of filtered items displayed
   totalCount?: number; // Number of total filtered items
   warehouses?: SelectProps["options"];
+  loading?: boolean;
 }
 
 type TagRender = SelectProps["tagRender"];
@@ -24,8 +25,8 @@ const Search = ({
   filteredCount,
   totalCount,
   warehouses,
+  loading,
 }: SearchProps) => {
-  const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<SearchType>(
     SearchType.ITEM_MASTER
   );
@@ -52,7 +53,6 @@ const Search = ({
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={onClose}
-        style={{ marginInlineEnd: 4 }}
       >
         {label}
       </Tag>
@@ -64,8 +64,6 @@ const Search = ({
     if (onSearch) {
       if (searchType === SearchType.WAREHOUSE) {
         onSearch(searchType, selectedWarehouses);
-        // When warehouse is selected, filteredTotalCount should be the total for that warehouse
-        // This should be set by the parent component based on the search results
       } else {
         onSearch(searchType, searchText);
       }
@@ -75,6 +73,7 @@ const Search = ({
   const handleReset = () => {
     setSearchText("");
     setSelectedWarehouses([]);
+    setSearchType(SearchType.ITEM_MASTER);
     setIsFiltered(false);
     setFilteredTotalCount(undefined);
     if (onSearch) {
@@ -104,7 +103,6 @@ const Search = ({
   // Calculate display count
   const displayCount = filteredCount ?? 0;
   const displayTotal = filteredTotalCount ?? totalCount ?? 0;
-  const showCount = displayCount > 0 || displayTotal > 0;
 
   return (
     <div className="w-full flex items-center gap-3">
@@ -130,16 +128,25 @@ const Search = ({
           <Select
             className="flex-1"
             mode="multiple"
+            showSearch
             tagRender={tagRender}
             placeholder="Select warehouses..."
             value={selectedWarehouses}
             onChange={setSelectedWarehouses}
             options={warehouses}
             loading={loading}
+            filterOption={(input, option) => {
+              const label = option?.label;
+              if (typeof label === "string") {
+                return label.toLowerCase().includes(input.toLowerCase());
+              }
+              return false;
+            }}
           />
         )}
 
         <Button
+          className="shadow-none"
           type="primary"
           icon={<SearchOutlined />}
           onClick={handleSearch}
@@ -150,20 +157,9 @@ const Search = ({
           }
         />
       </Space.Compact>
-      {showCount && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "0 12px",
-            fontSize: 14,
-            color: "#666",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {displayCount.toLocaleString()}/{displayTotal.toLocaleString()} Items
-        </div>
-      )}
+      <div className="flex items-center py-0 px-3 text-sm text-gray-500 whitespace-nowrap">
+        {displayCount.toLocaleString()}/{displayTotal.toLocaleString()} Items
+      </div>
       <Button
         icon={<RedoOutlined />}
         onClick={handleReset}
