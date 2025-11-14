@@ -15,6 +15,7 @@ import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
 import AddMovementModal from "./AddMovementModal";
 import ItemMovementChart from "./ItemMovementChart";
+import EditInventoryModal from "./EditInventoryModal";
 
 export enum ActivityType {
   INBOUND = "inbound",
@@ -58,13 +59,13 @@ interface MovementsData {
 interface TableItemsProps {
   items: Item[];
   loading?: boolean;
-  onAddedMovement?: () => void;
+  onFetchItems?: () => void;
 }
 
 const TableItems = ({
   items,
   loading = false,
-  onAddedMovement,
+  onFetchItems,
 }: TableItemsProps) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [movementsData, setMovementsData] = useState<
@@ -75,6 +76,8 @@ const TableItems = ({
   >({});
   const [addMovementModalOpen, setAddMovementModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  const [editInventoryModalOpen, setEditInventoryModalOpen] = useState(false);
 
   const fetchMovements = async (sku: string, forceRefresh: boolean = false) => {
     if (movementsData[sku] && !forceRefresh) return;
@@ -120,9 +123,14 @@ const TableItems = ({
 
   const handleAddMovementSuccess = async (sku: string) => {
     fetchMovements(sku, true);
-    if (onAddedMovement) {
-      onAddedMovement();
+    if (onFetchItems) {
+      onFetchItems();
     }
+  };
+
+  const handleEdit = (record: Item) => {
+    setSelectedItem(record);
+    setEditInventoryModalOpen(true);
   };
 
   const getStockStatusConfig = (status: string) => {
@@ -234,9 +242,8 @@ const TableItems = ({
           <Tooltip title="Edit">
             <Button
               type="text"
-              disabled
               icon={<EditOutlined className="text-lg" />}
-              onClick={() => console.log("Edit", record.sku)}
+              onClick={() => handleEdit(record)}
             />
           </Tooltip>
           <Tooltip
@@ -339,6 +346,22 @@ const TableItems = ({
           setAddMovementModalOpen(false);
           setSelectedItem(null);
         }}
+      />
+
+      <EditInventoryModal
+        open={editInventoryModalOpen}
+        onCancel={() => {
+          setEditInventoryModalOpen(false);
+          setSelectedItem(null);
+        }}
+        onSuccess={() => {
+          if (selectedItem) {
+            onFetchItems?.();
+          }
+          setEditInventoryModalOpen(false);
+          setSelectedItem(null);
+        }}
+        item={selectedItem}
       />
     </>
   );

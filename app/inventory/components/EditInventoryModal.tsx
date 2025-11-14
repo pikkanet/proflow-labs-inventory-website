@@ -1,26 +1,35 @@
 "use client";
 
 import axiosInstance from "@/app/services/axiosInstance";
-import { Modal, Form, Input, Select, Divider, Button, SelectProps } from "antd";
+import { Modal, Form, Input, Divider, Button, Image } from "antd";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { Item } from "./TableItems";
 
-interface CreateInventoryModalProps {
+interface EditInventoryModalProps {
   open: boolean;
   onCancel: () => void;
   onSuccess?: () => void;
-  warehouses: SelectProps["options"];
+  item: Item | null;
 }
 
-const CreateInventoryModal = ({
+const EditInventoryModal = ({
   open,
   onCancel,
   onSuccess,
-  warehouses,
-}: CreateInventoryModalProps) => {
+  item,
+}: EditInventoryModalProps) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open && item) {
+      form.setFieldsValue({
+        itemMaster: item.name,
+      });
+    }
+  }, [open, item, form]);
 
   const handleCancel = () => {
     form.resetFields();
@@ -31,31 +40,25 @@ const CreateInventoryModal = ({
     try {
       const values = await form.validateFields();
       setSubmitting(true);
-      const randomColor = Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(3, "0");
-      const image = `${process.env.NEXT_PUBLIC_MOCK_IMAGE_URL}/${randomColor}/${randomColor}`;
 
-      const response = await axiosInstance.post("/items", {
+      const response = await axiosInstance.patch(`/items/${item?.sku}`, {
         name: values.itemMaster,
-        image,
-        warehouse_id: values.warehouse,
       });
       const { data, status } = response;
 
-      if (status !== 201) {
+      if (status !== 200) {
         const errorData = data.message;
         await Swal.fire({
           icon: "error",
           title: "Error!",
-          text: errorData.message || "Failed to create inventory item",
+          text: errorData.message || "Failed to update inventory item",
           confirmButtonColor: "#326A8C",
         });
       } else {
         await Swal.fire({
           icon: "success",
           title: "Success!",
-          text: "Inventory item created successfully",
+          text: "Inventory item updated successfully",
           confirmButtonColor: "#326A8C",
         });
         form.resetFields();
@@ -71,7 +74,7 @@ const CreateInventoryModal = ({
       if (error instanceof AxiosError) {
         await Swal.fire({
           icon: "error",
-          title: "Create Inventory Failed!",
+          title: "Update Inventory Failed!",
           text: error.response?.data?.message,
           confirmButtonColor: "#326A8C",
         });
@@ -92,7 +95,7 @@ const CreateInventoryModal = ({
     <Modal
       title={
         <div>
-          <p className="text-lg font-semibold">Create Inventory</p>
+          <p className="text-lg font-semibold">Edit Inventory</p>
         </div>
       }
       open={open}
@@ -117,50 +120,43 @@ const CreateInventoryModal = ({
       width={600}
     >
       <Divider className="mt-0 mb-4" />
-      <Form form={form} layout="vertical" requiredMark={false}>
-        <Form.Item
-          label="Item Master"
-          name="itemMaster"
-          rules={[
-            { required: true, message: "Please enter item master" },
-            {
-              validator: (_, value) => {
-                if (!value || value.trim().length === 0) {
-                  return Promise.reject(
-                    new Error(
-                      "Item Master cannot be empty or contain only spaces"
-                    )
-                  );
-                }
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <Input placeholder="Enter item master" maxLength={100} />
-        </Form.Item>
 
-        <Form.Item
-          label="Warehouse"
-          name="warehouse"
-          rules={[{ required: true, message: "Please select warehouse" }]}
-        >
-          <Select
-            placeholder="Select warehouse"
-            options={warehouses}
-            showSearch
-            filterOption={(input, option) => {
-              const label = option?.label;
-              if (typeof label === "string") {
-                return label.toLowerCase().includes(input.toLowerCase());
-              }
-              return false;
-            }}
+      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+        <div className="w-[80px] h-[80px] flex-shrink-0">
+          <Image
+            src={item?.image}
+            alt={item?.name}
+            width={80}
+            height={80}
+            className="object-cover rounded"
+            preview={false}
           />
-        </Form.Item>
-      </Form>
+        </div>
+        <div className="flex-1 min-w-0">
+          <Form form={form} layout="vertical" requiredMark={false}>
+            <Form.Item
+              label="Item Master"
+              name="itemMaster"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value || value.trim().length === 0) {
+                      return Promise.reject(
+                        new Error("Please enter item master")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <Input placeholder="Enter item master" maxLength={100}/>
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
     </Modal>
   );
 };
 
-export default CreateInventoryModal;
+export default EditInventoryModal;

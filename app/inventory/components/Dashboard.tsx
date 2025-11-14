@@ -12,12 +12,14 @@ import DashboardCard from "./DashboardCard";
 import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
 import { useRefresh } from "@/app/contexts/RefreshContext";
+import { format } from "date-fns";
 
 interface DashboardData {
   totalItems: number;
   totalQuantity: number;
   lowStock: number;
   outOfStock: number;
+  lastUpdated: string;
 }
 
 const Dashboard = () => {
@@ -113,7 +115,7 @@ const Dashboard = () => {
       <div className="flex justify-end pt-2 -mb-1">
         <p className="text-sm text-gray-500">
           <span className="font-bold">Last updated:</span>{" "}
-          {new Date().toLocaleString()}
+          {format(new Date(data.lastUpdated), "MMM d, yyyy h:mm a")}
         </p>
       </div>
     </>

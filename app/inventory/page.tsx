@@ -154,7 +154,7 @@ const InventoryPage = () => {
     fetchItems();
   };
 
-  const handleAddedMovement = useCallback(() => {
+  const handleFetchItems = useCallback(() => {
     fetchItems();
   }, [fetchItems]);
 
@@ -187,7 +187,7 @@ const InventoryPage = () => {
         <TableItems
           items={items}
           loading={loadingItems}
-          onAddedMovement={handleAddedMovement}
+          onFetchItems={handleFetchItems}
         />
       </div>
       <InventoryPagination
