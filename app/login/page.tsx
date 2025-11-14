@@ -13,10 +13,10 @@ const LoginPage = () => {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
-      await login(values.email, values.password);
+      await login(values.username, values.password);
     } catch (error: unknown | AxiosError) {
       let errorMessage = "Please retry again later";
       if (error instanceof AxiosError) {
@@ -59,23 +59,15 @@ const LoginPage = () => {
           requiredMark={false}
           size="large"
         >
-          {/* TODO: Change to Username instead of Email */}
           <Form.Item
-            name="email"
-            label="Email"
+            name="username"
+            label="Username"
             className="mb-4"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              {
-                type: "email",
-                message: "Please enter a valid email address!",
-              },
-            ]}
+            rules={[{ required: true, message: "Please input your username!" }]}
           >
             <Input
               prefix={<UserOutlined className="text-gray-400" />}
-              placeholder="Enter Email"
-              autoComplete="email"
+              placeholder="Enter Username"
             />
           </Form.Item>
 

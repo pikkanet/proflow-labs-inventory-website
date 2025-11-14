@@ -1,8 +1,7 @@
 import axios from "axios";
 
-// TODO: Move to .env
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3001/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 30000,
 });
 

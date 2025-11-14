@@ -60,7 +60,7 @@ const AppLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const email = user?.email || "";
+  const username = user?.username || "";
 
   // Hide layout on login page
   const isLoginPage = pathname === "/login";
@@ -109,8 +109,8 @@ const AppLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     logout();
   }, [logout]);
 
-  const getAvatar = useCallback((email: string) => {
-    return email.charAt(0).toUpperCase();
+  const getAvatar = useCallback((username: string) => {
+    return username.charAt(0).toUpperCase();
   }, []);
 
   // If on login page, render children without layout
@@ -188,11 +188,11 @@ const AppLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
           <div className="px-4 py-4 text-gray-700">
             <div className="flex items-center gap-2">
               <Avatar size={32} onClick={() => setCollapsed(false)}>
-                <span className="text-sm ">{getAvatar(email)}</span>
+                <span className="text-sm ">{getAvatar(username)}</span>
               </Avatar>
               {!collapsed && (
                 <>
-                  <span className="text-sm flex-1">{email}</span>
+                  <span className="text-sm flex-1">{username}</span>
                   <LogoutOutlined
                     className="text-gray-600 cursor-pointer"
                     onClick={handleLogout}

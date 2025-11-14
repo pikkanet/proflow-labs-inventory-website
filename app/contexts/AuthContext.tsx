@@ -14,7 +14,7 @@ import axiosInstance from "../services/axiosInstance";
 
 interface User {
   id: string;
-  email: string;
+  username: string;
   name: string;
   role: string;
 }
@@ -22,7 +22,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   // Protect routes - redirect to login if not authenticated
   useEffect(() => {
@@ -69,10 +69,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [loading, token, pathname, router]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (username: string, password: string) => {
       try {
         const response = await axiosInstance.post("/auth/login", {
-          email,
+          username,
           password,
         });
 
@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const accessToken = data?.access_token;
         setToken(accessToken);
         localStorage.setItem("access_token", accessToken);
+        document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
 
         // TODO: Recheck after integrate
         // Store user Info
@@ -112,6 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
+    document.cookie = "access_token=; path=/; max-age=0";
     router.push("/login");
   }, [router]);
 
