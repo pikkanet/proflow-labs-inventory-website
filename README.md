@@ -6,7 +6,7 @@ Frontend website for the Inventory Management System, built with Next.js (App Ro
 > **Frontend Repository:** [proflow-labs-inventory-website](https://github.com/pikkanet/proflow-labs-inventory-website)  
 
 
-> **Live Website:** [Link](https://proflow-labs-inventory-website.vercel.app/)
+> **Live Website:** [Link](https://proflow-labs-inventory-website.vercel.app/)  
 > **API URL** https://static-aurel-proflowlabs-assessment-d460a949.koyeb.app/api
 
 ---
@@ -383,7 +383,7 @@ Clear and accurate for users.
 This project used AI tools to support documentation and UI development:
 
 - **Cursor** — Autocomplete, UI refactor suggestions
-- **ChatGPT GPT-5.1 (2025)** — Used for README writing, code review suggestions, and clarifying assignment requirements
+- **ChatGPT** — Used for README writing, code review suggestions, and clarifying assignment requirements
 
 No AI-generated code was used without review and modification.
 
