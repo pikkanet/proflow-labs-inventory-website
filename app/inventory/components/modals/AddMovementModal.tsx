@@ -161,12 +161,14 @@ const AddMovementModal = ({
     >
       <Divider className="mt-0 mb-0" />
       {item && (
-        <div className="flex items-center gap-4">
-          <div className="h-24 flex-1 flex items-center ">
-            <p className="font-semibold">{item.warehouse}</p>
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="h-24 flex-1 flex items-center min-w-0">
+            <p className="font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+              {item.warehouse}
+            </p>
           </div>
           <Divider className="h-24 m-0" type="vertical" />
-          <div className="h-24 flex-2 flex items-center">
+          <div className="h-24 flex-2 flex items-center min-w-0 overflow-hidden">
             <ItemMasterDisplay
               name={item.name}
               sku={item.sku}
@@ -221,7 +223,7 @@ const AddMovementModal = ({
                     if (value > (item?.qty || 0)) {
                       return Promise.reject(
                         new Error(
-                          `Quantity must be less than or equal to ${item?.qty}`
+                          `Quantity must be less than or equal to ${item?.qty.toLocaleString()}`
                         )
                       );
                     }

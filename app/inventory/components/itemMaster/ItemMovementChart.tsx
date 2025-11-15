@@ -47,7 +47,8 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     return (
       <div className="bg-white p-2 border border-gray-200 rounded-md shadow-md">
         <p className="m-0 font-semibold">
-          QTY: {payload[0].value} ({payload[0].payload.fullDate})
+          QTY: {payload[0].value.toLocaleString()} (
+          {payload[0].payload.fullDate})
         </p>
       </div>
     );

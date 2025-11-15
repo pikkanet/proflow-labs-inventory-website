@@ -18,6 +18,72 @@ interface CreateInventoryModalProps {
   warehouses: SelectProps["options"];
 }
 
+const images = [
+  {
+    image: "https://dummyimage.com/600x400/B0E/B0E",
+  },
+  {
+    image: "https://dummyimage.com/600x400/DDC/DDC",
+  },
+  {
+    image: "https://dummyimage.com/600x400/EDC/EDC",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FFB/FFB",
+  },
+  {
+    image: "https://dummyimage.com/600x400/F9C/F9C",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FF8/FF8",
+  },
+  {
+    image: "https://dummyimage.com/600x400/DDB/DDB",
+  },
+  {
+    image: "https://dummyimage.com/600x400/E6E/E6E",
+  },
+  {
+    image: "https://dummyimage.com/600x400/EDC/EDC",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FF8/FF8",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FFD/FFD",
+  },
+  {
+    image: "https://dummyimage.com/600x400/DDD/DDD",
+  },
+  {
+    image: "https://dummyimage.com/600x400/DDC/DDC",
+  },
+  {
+    image: "https://dummyimage.com/600x400/9A8/9A8",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FFD/FFD",
+  },
+  {
+    image: "https://dummyimage.com/600x400/EDC/EDC",
+  },
+  {
+    image: "https://dummyimage.com/600x400/F9C/F9C",
+  },
+  {
+    image: "https://dummyimage.com/600x400/FF7/FF7",
+  },
+  {
+    image: "https://dummyimage.com/600x400/A87/A87",
+  },
+  {
+    image: "https://dummyimage.com/600x400/DDB/DDB",
+  },
+  {
+    image: "https://dummyimage.com/600x400/9F8/9F8",
+  },
+];
+
 const CreateInventoryModal = ({
   open,
   onCancel,
@@ -36,10 +102,8 @@ const CreateInventoryModal = ({
     try {
       const values = await form.validateFields();
       setSubmitting(true);
-      const randomColor = Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(3, "0");
-      const image = `${process.env.NEXT_PUBLIC_MOCK_IMAGE_URL}/${randomColor}/${randomColor}`;
+      const randomIndex = Math.floor(Math.random() * images.length);
+      const image = images[randomIndex].image;
       const request: ICreateItemMasterRequest = {
         name: values.itemMaster,
         image,

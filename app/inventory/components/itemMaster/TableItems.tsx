@@ -1,6 +1,7 @@
 "use client";
 
-import { Table, Image, Button, Space, Tooltip, Badge, Divider } from "antd";
+import { Table, Button, Space, Tooltip, Badge, Divider } from "antd";
+import Image from "@/app/shared/components/Image";
 import {
   EditOutlined,
   EyeOutlined,
@@ -10,15 +11,15 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { format } from "date-fns";
 import { useState } from "react";
-import ItemMovementsTable from "./ItemMovementsTable";
 import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
 import AddMovementModal from "../modals/AddMovementModal";
-import ItemMovementChart from "./ItemMovementChart";
 import EditInventoryModal from "../modals/EditInventoryModal";
 import { IItemMaster } from "../../types/itemMaster";
 import { StockStatus } from "../../enums/stockStatus";
 import { IMovement, IMovementResponse } from "../../types/movement";
+import ItemMovementsTable from "./ItemMovementsTable";
+import ItemMovementChart from "./ItemMovementChart";
 
 interface TableItemsProps {
   items: IItemMaster[];
