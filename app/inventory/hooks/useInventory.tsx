@@ -5,6 +5,7 @@ import { useRefresh } from "../../contexts/RefreshContext";
 import { SearchType } from "../enums/searchType";
 import { IItemMaster, IItemMasterResponse } from "../types/itemMaster";
 import { IWarehouse, IWarehouseResponse } from "../types/warehouse";
+import { AxiosError } from "axios";
 
 const useInventory = () => {
   const [items, setItems] = useState<IItemMaster[]>([]);
@@ -77,7 +78,13 @@ const useInventory = () => {
         setFilteredCount(result.length);
         setTotalCount(data.totalItems);
         setItems(result);
-      } catch {
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          const errorStatus = error.response?.status;
+          if (errorStatus === 401) {
+            return;
+          }
+        }
         await Swal.fire({
           icon: "error",
           title: "Something went wrong!",
@@ -104,7 +111,13 @@ const useInventory = () => {
 
       const result = data.data || [];
       setWarehouses(result);
-    } catch {
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const errorStatus = error.response?.status;
+        if (errorStatus === 401) {
+          return;
+        }
+      }
     } finally {
       setLoadingWarehouses(false);
     }
@@ -175,4 +188,3 @@ const useInventory = () => {
 };
 
 export default useInventory;
-

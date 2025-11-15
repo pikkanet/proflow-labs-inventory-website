@@ -12,6 +12,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import axiosInstance from "../services/axiosInstance";
 import { ILoginRequest, ILoginResponse } from "../login/types/login";
+import { clearAuthData, isValidToken } from "../shared/utils/auth";
 
 interface User {
   id: string;
@@ -43,13 +44,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedToken = localStorage.getItem("access_token");
     const storedUser = localStorage.getItem("user");
 
+    // Validate token
     if (storedToken && storedUser) {
       try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        if (isValidToken(storedToken)) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        } else {
+          clearAuthData();
+          setToken(null);
+          setUser(null);
+        }
       } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
+        clearAuthData();
+        setToken(null);
+        setUser(null);
       }
     }
     setLoading(false);
@@ -112,9 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user");
-    document.cookie = "access_token=; path=/; max-age=0";
+    clearAuthData();
     router.push("/login");
   }, [router]);
 

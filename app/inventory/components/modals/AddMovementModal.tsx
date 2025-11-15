@@ -90,6 +90,10 @@ const AddMovementModal = ({
       }
     } catch (error) {
       if (error instanceof AxiosError) {
+        const errorStatus = error.response?.status;
+        if (errorStatus === 401) {
+          return;
+        }
         await Swal.fire({
           icon: "error",
           title: "Add Movement Failed!",

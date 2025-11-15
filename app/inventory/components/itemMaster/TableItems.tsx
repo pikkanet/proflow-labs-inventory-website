@@ -20,6 +20,7 @@ import { StockStatus } from "../../enums/stockStatus";
 import { IMovement, IMovementResponse } from "../../types/movement";
 import ItemMovementsTable from "./ItemMovementsTable";
 import ItemMovementChart from "./ItemMovementChart";
+import { AxiosError } from "axios";
 
 interface TableItemsProps {
   items: IItemMaster[];
@@ -58,7 +59,13 @@ const TableItems = ({
       }
       const movements = data.data;
       setMovementsData((prev) => ({ ...prev, [sku]: movements }));
-    } catch {
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const errorStatus = error.response?.status;
+        if (errorStatus === 401) {
+          return;
+        }
+      }
       await Swal.fire({
         icon: "error",
         title: "Something went wrong!",
