@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "@/app/services/axiosInstance";
+import axiosInstance from "@/app/shared/services/axiosInstance";
 import Swal from "sweetalert2";
 import { useRefresh } from "@/app/contexts/RefreshContext";
 import { IDashboard, IDashboardResponse } from "../../../types/dashboard";

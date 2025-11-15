@@ -10,7 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import axiosInstance from "../services/axiosInstance";
+import axiosInstance from "../shared/services/axiosInstance";
 import { ILoginRequest, ILoginResponse } from "../login/types/login";
 import { clearAuthData, isValidToken } from "../shared/utils/auth";
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import axiosInstance from "../../services/axiosInstance";
+import axiosInstance from "../../shared/services/axiosInstance";
 import Swal from "sweetalert2";
 import { useRefresh } from "../../contexts/RefreshContext";
 import { SearchType } from "../enums/searchType";

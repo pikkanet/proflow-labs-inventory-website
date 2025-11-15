@@ -1,6 +1,6 @@
 "use client";
 
-import axiosInstance from "@/app/services/axiosInstance";
+import axiosInstance from "@/app/shared/services/axiosInstance";
 import { Modal, Form, Input, Select, Divider, Button, SelectProps } from "antd";
 import { AxiosError } from "axios";
 import { useState } from "react";

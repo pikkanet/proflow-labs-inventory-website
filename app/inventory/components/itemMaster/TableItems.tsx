@@ -11,7 +11,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { format } from "date-fns";
 import { useState } from "react";
-import axiosInstance from "@/app/services/axiosInstance";
+import axiosInstance from "@/app/shared/services/axiosInstance";
 import Swal from "sweetalert2";
 import AddMovementModal from "../modals/AddMovementModal";
 import EditInventoryModal from "../modals/EditInventoryModal";
