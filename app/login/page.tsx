@@ -2,37 +2,12 @@
 
 import { Card, Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import Swal from "sweetalert2";
 import Image from "next/image";
-import { AxiosError } from "axios";
+import useLogin from "./hooks/useLogin";
 
 const LoginPage = () => {
   const [form] = Form.useForm();
-  const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
-
-  const onFinish = async (values: { username: string; password: string }) => {
-    setLoading(true);
-    try {
-      await login(values.username, values.password);
-    } catch (error: unknown | AxiosError) {
-      let errorMessage = "Please retry again later";
-      if (error instanceof AxiosError) {
-        errorMessage = error?.response?.data?.message;
-      }
-
-      await Swal.fire({
-        icon: "error",
-        title: "Something went wrong!",
-        text: errorMessage,
-        confirmButtonColor: "#326A8C",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { loading, onFinish } = useLogin();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

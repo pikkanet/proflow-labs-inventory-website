@@ -1,7 +1,7 @@
 "use client";
 
 import { Layout } from "antd";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./components/dashboard/Dashboard";
 import { RefreshProvider } from "@/app/contexts/RefreshContext";
 
 const { Header, Content } = Layout;

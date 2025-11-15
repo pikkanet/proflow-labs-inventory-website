@@ -5,13 +5,18 @@ import { Modal, Form, Input, Divider, Button, Image } from "antd";
 import { AxiosError } from "axios";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { Item } from "./TableItems";
+import { IItemMaster } from "../../types/itemMaster";
+import {
+  IEditItemMasterRequest,
+  IEditItemMasterResponse,
+} from "../../types/editItemMaster";
+import { ITEM_MASTER_MAX_LENGTH } from "../../constants/itemMaster";
 
 interface EditInventoryModalProps {
   open: boolean;
   onCancel: () => void;
   onSuccess?: () => void;
-  item: Item | null;
+  item: IItemMaster | null;
 }
 
 const EditInventoryModal = ({
@@ -41,9 +46,14 @@ const EditInventoryModal = ({
       const values = await form.validateFields();
       setSubmitting(true);
 
-      const response = await axiosInstance.patch(`/items/${item?.sku}`, {
+      const request: IEditItemMasterRequest = {
         name: values.itemMaster,
-      });
+      };
+
+      const response = await axiosInstance.patch<IEditItemMasterResponse>(
+        `/items/${item?.sku}`,
+        request
+      );
       const { data, status } = response;
 
       if (status !== 200) {
@@ -51,7 +61,7 @@ const EditInventoryModal = ({
         await Swal.fire({
           icon: "error",
           title: "Error!",
-          text: errorData.message || "Failed to update inventory item",
+          text: errorData || "Failed to update inventory item",
           confirmButtonColor: "#326A8C",
         });
       } else {
@@ -150,7 +160,10 @@ const EditInventoryModal = ({
                 },
               ]}
             >
-              <Input placeholder="Enter item master" maxLength={100}/>
+              <Input
+                placeholder="Enter item master"
+                maxLength={ITEM_MASTER_MAX_LENGTH}
+              />
             </Form.Item>
           </Form>
         </div>

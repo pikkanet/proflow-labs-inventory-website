@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import axiosInstance from "../services/axiosInstance";
+import { ILoginRequest, ILoginResponse } from "../login/types/login";
 
 interface User {
   id: string;
@@ -22,7 +23,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (data: ILoginRequest) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -69,23 +70,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [loading, token, pathname, router]);
 
   const login = useCallback(
-    async (username: string, password: string) => {
+    async (data: ILoginRequest) => {
       try {
-        const response = await axiosInstance.post("/auth/login", {
-          username,
-          password,
-        });
+        const response = await axiosInstance.post<ILoginResponse>(
+          "/auth/login",
+          data
+        );
 
-        const { data, status } = response;
+        const { data: responseData, status } = response;
 
         if (status !== 200) {
-          const errorMessage = data.error || "Login failed";
+          const errorMessage = responseData?.message || "Login failed";
 
           throw new Error(errorMessage);
         }
 
         // Store token
-        const accessToken = data?.access_token;
+        const accessToken = responseData?.access_token;
         setToken(accessToken);
         localStorage.setItem("access_token", accessToken);
         document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;

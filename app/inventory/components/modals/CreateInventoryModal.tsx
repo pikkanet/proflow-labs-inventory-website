@@ -5,6 +5,11 @@ import { Modal, Form, Input, Select, Divider, Button, SelectProps } from "antd";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import {
+  ICreateItemMasterRequest,
+  ICreateItemMasterResponse,
+} from "../../types/createItemMaster";
+import { ITEM_MASTER_MAX_LENGTH } from "../../constants/itemMaster";
 
 interface CreateInventoryModalProps {
   open: boolean;
@@ -35,12 +40,16 @@ const CreateInventoryModal = ({
         .toString()
         .padStart(3, "0");
       const image = `${process.env.NEXT_PUBLIC_MOCK_IMAGE_URL}/${randomColor}/${randomColor}`;
-
-      const response = await axiosInstance.post("/items", {
+      const request: ICreateItemMasterRequest = {
         name: values.itemMaster,
         image,
         warehouse_id: values.warehouse,
-      });
+      };
+
+      const response = await axiosInstance.post<ICreateItemMasterResponse>(
+        "/items",
+        request
+      );
       const { data, status } = response;
 
       if (status !== 201) {
@@ -48,7 +57,7 @@ const CreateInventoryModal = ({
         await Swal.fire({
           icon: "error",
           title: "Error!",
-          text: errorData.message || "Failed to create inventory item",
+          text: errorData || "Failed to create inventory item",
           confirmButtonColor: "#326A8C",
         });
       } else {
@@ -137,7 +146,10 @@ const CreateInventoryModal = ({
             },
           ]}
         >
-          <Input placeholder="Enter item master" maxLength={100} />
+          <Input
+            placeholder="Enter item master"
+            maxLength={ITEM_MASTER_MAX_LENGTH}
+          />
         </Form.Item>
 
         <Form.Item

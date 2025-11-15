@@ -2,7 +2,7 @@
 
 import { Select, Input, Button, Space } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import useInventoryPagination from "./hooks/useInventoryPagination";
 
 interface InventoryPaginationProps {
   total: number;
@@ -19,80 +19,28 @@ const InventoryPagination = ({
   onChange,
   onPageSizeChange,
 }: InventoryPaginationProps) => {
-  const [goToPage, setGoToPage] = useState<string>("");
-  const totalPages = Math.ceil(total / pageSize);
-
-  const handlePageSizeChange = (value: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(value);
-    }
-    onChange(1, value);
-  };
-
-  const handleGoToPage = () => {
-    const page = parseInt(goToPage, 10);
-    if (page >= 1 && page <= totalPages) {
-      onChange(page, pageSize);
-      setGoToPage("");
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleGoToPage();
-    }
-  };
-
-  const handlePrev = () => {
-    if (current > 1) {
-      onChange(current - 1, pageSize);
-    }
-  };
-
-  const handleNext = () => {
-    if (current < totalPages) {
-      onChange(current + 1, pageSize);
-    }
-  };
-
-  const handlePageClick = (page: number) => {
-    onChange(page, pageSize);
-  };
-
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (current <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      } else if (current >= totalPages - 2) {
-        pages.push(1);
-        pages.push("ellipsis");
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push("ellipsis");
-        for (let i = current - 1; i <= current + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
+  const {
+    goToPage,
+    setGoToPage,
+    totalPages,
+    pageSizeOptions,
+    handlePageSizeChange,
+    handleGoToPage,
+    handleKeyPress,
+    handlePrev,
+    handleNext,
+    handlePageClick,
+    getPageNumbers,
+    isPrevDisabled,
+    isNextDisabled,
+    isGoToDisabled,
+  } = useInventoryPagination({
+    total,
+    current,
+    pageSize,
+    onChange,
+    onPageSizeChange,
+  });
 
   return (
     <div className="w-full mt-2 flex justify-between items-center ">
@@ -104,12 +52,7 @@ const InventoryPagination = ({
             value={pageSize}
             onChange={handlePageSizeChange}
             className="w-20"
-            options={[
-              { value: 10, label: "10" },
-              { value: 20, label: "20" },
-              { value: 50, label: "50" },
-              { value: 100, label: "100" },
-            ]}
+            options={pageSizeOptions}
           />
         </Space>
         <Space>
@@ -124,7 +67,7 @@ const InventoryPagination = ({
             min={1}
             max={totalPages}
           />
-          <Button onClick={handleGoToPage} disabled={!goToPage}>
+          <Button onClick={handleGoToPage} disabled={isGoToDisabled}>
             Go
           </Button>
         </Space>
@@ -137,7 +80,7 @@ const InventoryPagination = ({
           <Button
             icon={<LeftOutlined />}
             onClick={handlePrev}
-            disabled={current === 1}
+            disabled={isPrevDisabled}
             size="small"
           />
           {getPageNumbers().map((page, index) => {
@@ -163,7 +106,7 @@ const InventoryPagination = ({
           <Button
             icon={<RightOutlined />}
             onClick={handleNext}
-            disabled={current === totalPages}
+            disabled={isNextDisabled}
             size="small"
           />
         </Space>

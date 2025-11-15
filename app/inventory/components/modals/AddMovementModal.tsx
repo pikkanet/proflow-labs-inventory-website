@@ -11,15 +11,16 @@ import {
   Badge,
 } from "antd";
 import Swal from "sweetalert2";
-import ItemMasterDisplay from "./ItemMasterDisplay";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/app/services/axiosInstance";
-import { ActivityType, Item } from "./TableItems";
 import { AxiosError } from "axios";
+import { IItemMaster } from "../../types/itemMaster";
+import { ActivityType } from "../../enums/activityType";
+import ItemMasterDisplay from "../itemMaster/ItemMasterDisplay";
 
 interface AddMovementModalProps {
   open: boolean;
-  item: Item | null;
+  item: IItemMaster | null;
   onCancel: () => void;
   onSuccess?: () => void;
 }
@@ -288,7 +289,7 @@ const AddMovementModal = ({
             placeholder="Enter note (max 50 characters)"
             value={noteValue}
             onChange={handleNoteChange}
-            maxLength={100}
+            maxLength={50}
             showCount={{
               formatter: () => `${noteCount}/50`,
             }}

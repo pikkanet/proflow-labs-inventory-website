@@ -3,14 +3,15 @@
 import { Table, Tag } from "antd";
 import { format } from "date-fns";
 import type { ColumnsType } from "antd/es/table";
-import { ActivityType, Movement } from "./TableItems";
+import { ActivityType } from "../../enums/activityType";
+import { IMovement } from "../../types/movement";
 
 interface ItemMovementsTableProps {
-  movements: Movement[];
+  movements: IMovement[];
 }
 
 const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
-  const columns: ColumnsType<Movement> = [
+  const columns: ColumnsType<IMovement> = [
     {
       title: "Activity",
       dataIndex: "activity_type",
@@ -19,8 +20,8 @@ const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
         { text: "Inbound", value: "inbound" },
         { text: "Outbound", value: "outbound" },
       ],
-      onFilter: (value, record: Movement) => record.activity_type === value,
-      render: (activityType: ActivityType, record: Movement) => {
+      onFilter: (value, record: IMovement) => record.activity_type === value,
+      render: (activityType: ActivityType, record: IMovement) => {
         return (
           <div>
             <Tag
@@ -39,7 +40,7 @@ const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
       title: "Create At",
       dataIndex: "created_at",
       key: "created_at",
-      sorter: (a: Movement, b: Movement) =>
+      sorter: (a: IMovement, b: IMovement) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       render: (date: string) => format(new Date(date), "MMM d, yyyy h:mm a"),
     },
@@ -47,8 +48,8 @@ const ItemMovementsTable = ({ movements }: ItemMovementsTableProps) => {
       title: "QTY",
       dataIndex: "qty",
       key: "qty",
-      sorter: (a: Movement, b: Movement) => a.qty - b.qty,
-      render: (qty: number, record: Movement) => (
+      sorter: (a: IMovement, b: IMovement) => a.qty - b.qty,
+      render: (qty: number, record: IMovement) => (
         <span
           className={`${
             record.activity_type === ActivityType.INBOUND

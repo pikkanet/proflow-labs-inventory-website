@@ -13,51 +13,15 @@ import { useState } from "react";
 import ItemMovementsTable from "./ItemMovementsTable";
 import axiosInstance from "@/app/services/axiosInstance";
 import Swal from "sweetalert2";
-import AddMovementModal from "./AddMovementModal";
+import AddMovementModal from "../modals/AddMovementModal";
 import ItemMovementChart from "./ItemMovementChart";
-import EditInventoryModal from "./EditInventoryModal";
-
-export enum ActivityType {
-  INBOUND = "inbound",
-  OUTBOUND = "outbound",
-}
-
-export enum StockStatus {
-  IN_STOCK = "in_stock",
-  LOW_STOCK = "low_stock",
-  OUT_OF_STOCK = "out_of_stock",
-}
-
-export interface Item {
-  sku: string;
-  name: string;
-  warehouse: string;
-  qty: number;
-  reserve_qty: number;
-  stock_status: StockStatus;
-  updated_at: string;
-  is_show: boolean;
-  image: string;
-  warehouse_id: number;
-}
-
-export interface Movement {
-  id: string;
-  activity_type: ActivityType;
-  qty: number;
-  current_qty: number;
-  created_at: string;
-  note: string | null;
-}
-
-interface MovementsData {
-  sku: string;
-  name: string;
-  movements: Movement[];
-}
+import EditInventoryModal from "../modals/EditInventoryModal";
+import { IItemMaster } from "../../types/itemMaster";
+import { StockStatus } from "../../enums/stockStatus";
+import { IMovement, IMovementResponse } from "../../types/movement";
 
 interface TableItemsProps {
-  items: Item[];
+  items: IItemMaster[];
   loading?: boolean;
   onFetchItems?: () => void;
 }
@@ -69,13 +33,13 @@ const TableItems = ({
 }: TableItemsProps) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [movementsData, setMovementsData] = useState<
-    Record<string, MovementsData>
+    Record<string, IMovement[]>
   >({});
   const [loadingMovements, setLoadingMovements] = useState<
     Record<string, boolean>
   >({});
   const [addMovementModalOpen, setAddMovementModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [selectedItem, setSelectedItem] = useState<IItemMaster | null>(null);
 
   const [editInventoryModalOpen, setEditInventoryModalOpen] = useState(false);
 
@@ -84,7 +48,9 @@ const TableItems = ({
 
     setLoadingMovements((prev) => ({ ...prev, [sku]: true }));
     try {
-      const response = await axiosInstance.get(`/item/${sku}/movements`);
+      const response = await axiosInstance.get<IMovementResponse>(
+        `/item/${sku}/movements`
+      );
       const { data, status } = response;
       if (status !== 200) {
         throw new Error(data.message);
@@ -103,7 +69,7 @@ const TableItems = ({
     }
   };
 
-  const handleExpand = (expanded: boolean, record: Item) => {
+  const handleExpand = (expanded: boolean, record: IItemMaster) => {
     if (expanded) {
       setExpandedRows((prev) => new Set(prev).add(record.sku));
       fetchMovements(record.sku, true);
@@ -116,7 +82,7 @@ const TableItems = ({
     }
   };
 
-  const handleAddMovement = (record: Item) => {
+  const handleAddMovement = (record: IItemMaster) => {
     setSelectedItem(record);
     setAddMovementModalOpen(true);
   };
@@ -128,7 +94,7 @@ const TableItems = ({
     }
   };
 
-  const handleEdit = (record: Item) => {
+  const handleEdit = (record: IItemMaster) => {
     setSelectedItem(record);
     setEditInventoryModalOpen(true);
   };
@@ -150,14 +116,14 @@ const TableItems = ({
     );
   };
 
-  const renderColumns: ColumnsType<Item> = [
+  const renderColumns: ColumnsType<IItemMaster> = [
     {
       title: "Item Master",
       key: "item_master",
       width: 300,
       fixed: "left",
-      sorter: (a: Item, b: Item) => a.name.localeCompare(b.name),
-      render: (_, record: Item) => (
+      sorter: (a: IItemMaster, b: IItemMaster) => a.name.localeCompare(b.name),
+      render: (_, record: IItemMaster) => (
         <div className="flex items-center gap-3 min-w-[250px]">
           <div className="w-[60px] h-[60px] flex-shrink-0">
             <Image
@@ -187,7 +153,8 @@ const TableItems = ({
       dataIndex: "warehouse",
       key: "warehouse",
       width: 200,
-      sorter: (a: Item, b: Item) => a.warehouse.localeCompare(b.warehouse),
+      sorter: (a: IItemMaster, b: IItemMaster) =>
+        a.warehouse.localeCompare(b.warehouse),
     },
     {
       title: "QTY",
@@ -195,7 +162,7 @@ const TableItems = ({
       key: "qty",
       width: 100,
       align: "center",
-      sorter: (a: Item, b: Item) => a.qty - b.qty,
+      sorter: (a: IItemMaster, b: IItemMaster) => a.qty - b.qty,
       render: (qty: number) => qty.toLocaleString(),
     },
     {
@@ -204,7 +171,7 @@ const TableItems = ({
       key: "reserve_qty",
       width: 120,
       align: "center",
-      sorter: (a: Item, b: Item) => a.reserve_qty - b.reserve_qty,
+      sorter: (a: IItemMaster, b: IItemMaster) => a.reserve_qty - b.reserve_qty,
       render: (qty: number) => qty.toLocaleString(),
     },
     {
@@ -217,7 +184,7 @@ const TableItems = ({
         { text: "Low Stock", value: StockStatus.LOW_STOCK },
         { text: "Out of Stock", value: StockStatus.OUT_OF_STOCK },
       ],
-      onFilter: (value, record: Item) => record.stock_status === value,
+      onFilter: (value, record: IItemMaster) => record.stock_status === value,
       render: (status: string) => {
         const config = getStockStatusConfig(status);
         return <Badge status={config.status} text={config.label} />;
@@ -228,7 +195,7 @@ const TableItems = ({
       dataIndex: "updated_at",
       key: "updated_at",
       width: 200,
-      sorter: (a: Item, b: Item) =>
+      sorter: (a: IItemMaster, b: IItemMaster) =>
         new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
       render: (date: string) => format(new Date(date), "MMM d, yyyy h:mm a"),
     },
@@ -237,7 +204,7 @@ const TableItems = ({
       key: "action",
       width: 100,
       align: "center",
-      render: (_, record: Item) => (
+      render: (_, record: IItemMaster) => (
         <Space>
           <Tooltip title="Edit">
             <Button
@@ -271,7 +238,7 @@ const TableItems = ({
     },
   ];
 
-  const expandedRowRender = (record: Item) => {
+  const expandedRowRender = (record: IItemMaster) => {
     const movements = movementsData[record.sku] || [];
     const isLoading = loadingMovements[record.sku];
 

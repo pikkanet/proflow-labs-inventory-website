@@ -1,0 +1,1 @@
+export const ITEM_MASTER_MAX_LENGTH = 100;

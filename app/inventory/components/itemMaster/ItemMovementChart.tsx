@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { useState } from "react";
-import { ActivityType } from "./TableItems";
+import { ActivityType } from "../../enums/activityType";
 
 interface Movement {
   activity_type: ActivityType;
